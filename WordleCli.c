@@ -14,6 +14,7 @@
 #define GREEN   "\033[32m"
 #define YELLOW  "\033[33m"
 
+// only matters for windows
 void enableWindowsVirtualTerminal()
 {
     #ifdef _WIN32
@@ -31,7 +32,7 @@ void getWordFromFile(char *wordBuffer)
     FILE *filePrt;
     int targetLine = rand() % 14855;
 
-    filePrt = fopen("words.txt", "r");
+    filePrt = fopen("words.txt", "r"); // r for read only
     if (filePrt == NULL)
     {
         printf(RED "Error: could not open file.\n" RESET);
@@ -112,7 +113,7 @@ int main()
         }
     }
 
-    system("pause");
+    system("pause"); // Press any key to exit prompt
 
     return 0;
 }
