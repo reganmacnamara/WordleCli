@@ -14,6 +14,24 @@
 #define GREEN   "\033[32m"
 #define YELLOW  "\033[33m"
 
+#define redNum 0
+#define yellowNum 1
+#define greenNum 2
+
+typedef struct
+{
+    char letter;
+    int colour;
+} WordleLetter;
+
+typedef struct
+{
+    WordleLetter letters[5];
+} Guess;
+
+int currentGuess = 0;
+Guess guesses[6];
+
 // only matters for windows
 void enableWindowsVirtualTerminal()
 {
@@ -61,7 +79,8 @@ void handleGuess(char *guess, char *word)
         char current = guess[i];
         if (word[i] == current)
         {
-            printf(GREEN "%c" RESET, guess[i]);
+            guesses[currentGuess].letters[i].letter = guess[i];
+            guesses[currentGuess].letters[i].colour = greenNum;
             continue;
         }
 
@@ -76,9 +95,41 @@ void handleGuess(char *guess, char *word)
         }
 
         if (wordContainsLetter)
-            printf(YELLOW "%c" RESET, guess[i]);
+        {
+            guesses[currentGuess].letters[i].letter = guess[i];
+            guesses[currentGuess].letters[i].colour = yellowNum;
+        }
         else
-            printf(RED "%c" RESET, guess[i]);
+        {
+            guesses[currentGuess].letters[i].letter = guess[i];
+            guesses[currentGuess].letters[i].colour = redNum;
+        }
+    }
+}
+
+void printGuesses()
+{
+    //Clear Console
+    printf("\e[1;1H\e[2J");
+    printf("Guess any 5 letter word to start. You get 5 guesses to win. \n");
+    for (int i = 0; i < currentGuess; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            switch(guesses[i].letters[j].colour)
+            {
+                case greenNum:
+                    printf(GREEN "[%c]" RESET, guesses[i].letters[j].letter);
+                    break;
+                case yellowNum:
+                    printf(YELLOW "[%c]" RESET, guesses[i].letters[j].letter);
+                    break;
+                case redNum:
+                    printf(RED "[%c]" RESET, guesses[i].letters[j].letter);
+                    break;
+            }
+        }
+        printf("\n");
     }
     printf("\n");
 }
@@ -86,7 +137,6 @@ void handleGuess(char *guess, char *word)
 int main()
 {
     char input[6] = "";
-    int guesses = 0;
     char word[6] = "";
 
     enableWindowsVirtualTerminal();
@@ -99,18 +149,31 @@ int main()
         return 1;
     }
 
-    printf("Guess any 5 letter word to start. \n");
+    printf("Guess any 5 letter word to start. You get 6 guesses to win. \n\n");
 
     while(true)
     {
-        scanf("%5s", input);
+        scanf("%s", input);
+        if (strlen(input) != 5)
+        {
+            printf(RED "Please guess a valid 5 letter word. \n" RESET);
+            printGuesses();
+            continue;
+        }
         handleGuess(input, word);
-        guesses++;
+        currentGuess++;
+        printGuesses();
         if (strcmp(word, input) == 0)
         {
-            printf(GREEN "You win in %d %s!\n" RESET, guesses, guesses == 1 ? "guess" : "guesses");
+            printf(GREEN "You win in %d %s!\n" RESET, currentGuess, currentGuess == 1 ? "guess" : "guesses");
             break;
         }
+        if (currentGuess == 6)
+        {
+            printf(RED "You lose! The word was '%s' \n" RESET, word);
+            break;
+        }
+        memset(input, 0, sizeof(input));
     }
 
     system("pause"); // Press any key to exit prompt
